@@ -107,6 +107,32 @@ let AuthService = class AuthService {
                 throw new common_1.UnauthorizedException('Invalid User');
             return this.toPublicUser(user);
         };
+        this.updateProfile = async (userId, dto) => {
+            const user = await this.userRepository.findById(userId);
+            if (!user)
+                throw new common_1.UnauthorizedException('Invalid User');
+            if (dto.email && dto.email !== user.email) {
+                const existing = await this.userRepository.findByEmail(dto.email);
+                if (existing && existing._id.toString() !== userId) {
+                    throw new common_1.ConflictException('Email already in use');
+                }
+            }
+            const updates = {};
+            if (dto.fullName !== undefined)
+                updates.fullName = dto.fullName;
+            if (dto.email !== undefined)
+                updates.email = dto.email;
+            if (dto.phone !== undefined)
+                updates.phone = dto.phone;
+            if (dto.password) {
+                updates.password = await helperFunction_utils_1.HelperFunctionUtils.hashPassword(dto.password);
+            }
+            const updated = await this.userRepository.updateById(userId, updates);
+            if (!updated)
+                throw new common_1.UnauthorizedException('Invalid User');
+            (0, logger_service_1.logInfo)(`Profile updated: ${userId}`);
+            return this.toPublicUser(updated);
+        };
     }
     toPublicUser(user) {
         return {

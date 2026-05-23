@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -10,6 +10,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { AuthGuardPermissions } from './decorators/authGuardPermisssion';
 import { AuthUser } from './decorators/authUser';
@@ -64,5 +65,19 @@ export class AuthController {
   getProfile(@AuthUser() authUser: AuthUserPayload) {
     logInfo(`Profile request: ${authUser.userId}`);
     return this.authService.getProfile(authUser.userId);
+  }
+
+  @ApiBearerAuth('Token')
+  @UseGuards(AuthGuard)
+  @AuthGuardPermissions({
+    allowedUsers: [UserType.USER, UserType.ADMIN, UserType.SUBSCRIBER],
+  })
+  @Patch('/profile')
+  updateProfile(
+    @AuthUser() authUser: AuthUserPayload,
+    @Body() dto: UpdateProfileDto,
+  ) {
+    logInfo(`Profile update: ${authUser.userId}`);
+    return this.authService.updateProfile(authUser.userId, dto);
   }
 }

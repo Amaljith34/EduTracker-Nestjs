@@ -14,6 +14,7 @@ import { HelperFunctionUtils } from 'src/helpers/helperFunction.utils';
 import { logInfo, logWarn } from 'src/utils/logger/logger.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwTPayloadType, UserType } from './auth.type';
 import { DBStatus } from 'src/database/types';
 
@@ -118,6 +119,31 @@ export class AuthService {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new UnauthorizedException('Invalid User');
     return this.toPublicUser(user);
+  };
+
+  updateProfile = async (userId: string, dto: UpdateProfileDto) => {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('Invalid User');
+
+    if (dto.email && dto.email !== user.email) {
+      const existing = await this.userRepository.findByEmail(dto.email);
+      if (existing && existing._id.toString() !== userId) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
+    const updates: Partial<UserDocument> = {};
+    if (dto.fullName !== undefined) updates.fullName = dto.fullName;
+    if (dto.email !== undefined) updates.email = dto.email;
+    if (dto.phone !== undefined) updates.phone = dto.phone;
+    if (dto.password) {
+      updates.password = await HelperFunctionUtils.hashPassword(dto.password);
+    }
+
+    const updated = await this.userRepository.updateById(userId, updates);
+    if (!updated) throw new UnauthorizedException('Invalid User');
+    logInfo(`Profile updated: ${userId}`);
+    return this.toPublicUser(updated);
   };
 
   private toPublicUser(user: UserDocument) {

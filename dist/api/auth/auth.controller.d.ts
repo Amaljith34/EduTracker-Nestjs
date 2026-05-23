@@ -2,6 +2,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { AuthUserPayload, UserType } from './auth.type';
 export declare class AuthController {
     private authService;
@@ -52,6 +53,16 @@ export declare class AuthController {
         message: string;
     }>;
     getProfile(authUser: AuthUserPayload): Promise<{
+        id: string;
+        email: string;
+        fullName: string;
+        type: UserType;
+        phone: string;
+        subscriberId: string;
+        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        status: import("../../database/types").DBStatus;
+    }>;
+    updateProfile(authUser: AuthUserPayload, dto: UpdateProfileDto): Promise<{
         id: string;
         email: string;
         fullName: string;

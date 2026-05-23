@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UserType } from './auth.type';
 import { DBStatus } from 'src/database/types';
 export declare class AuthService {
@@ -56,6 +57,16 @@ export declare class AuthService {
         message: string;
     }>;
     getProfile: (userId: string) => Promise<{
+        id: string;
+        email: string;
+        fullName: string;
+        type: UserType;
+        phone: string;
+        subscriberId: string;
+        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        status: DBStatus;
+    }>;
+    updateProfile: (userId: string, dto: UpdateProfileDto) => Promise<{
         id: string;
         email: string;
         fullName: string;
