@@ -49,6 +49,10 @@ __decorate([
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], User.prototype, "subscriberId", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: [mongoose_2.SchemaTypes.ObjectId], ref: 'User', default: [] }),
+    __metadata("design:type", Array)
+], User.prototype, "subscriberIds", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: [user_subject_schema_1.UserSubjectSchema], default: [] }),
     __metadata("design:type", Array)
 ], User.prototype, "subjects", void 0);

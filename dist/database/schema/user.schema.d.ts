@@ -11,6 +11,7 @@ export declare class User {
     type: UserType;
     status: DBStatus;
     subscriberId?: Types.ObjectId;
+    subscriberIds?: Types.ObjectId[];
     subjects: UserSubject[];
     refreshToken?: string;
     createdBy?: Types.ObjectId;

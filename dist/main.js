@@ -20,7 +20,7 @@ async function bootstrap() {
             process.env.MOBILE_URL || 'http://localhost:8081',
         ].filter(Boolean);
         app.enableCors({
-            origin: allowedOrigins,
+            origin: true,
             credentials: true,
             methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
             allowedHeaders: ['Content-Type', 'Authorization'],

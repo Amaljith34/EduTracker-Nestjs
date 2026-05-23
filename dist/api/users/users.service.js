@@ -44,6 +44,7 @@ let UsersService = class UsersService {
             password: hashedPassword,
             type: auth_type_1.UserType.USER,
             subscriberId: new mongoose_1.Types.ObjectId(subscriberId),
+            subscriberIds: [new mongoose_1.Types.ObjectId(subscriberId)],
             subjects: dto.subjects ?? [],
             status: types_1.DBStatus.ACTIVE,
             createdBy: new mongoose_1.Types.ObjectId(authUser.userId),

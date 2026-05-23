@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const config_1 = require("@nestjs/config");
 const jwt = require("jsonwebtoken");
+const mongoose_1 = require("mongoose");
 const user_repository_1 = require("../../database/repositories/user.repository");
 const helperFunction_utils_1 = require("../../helpers/helperFunction.utils");
 const logger_service_1 = require("../../utils/logger/logger.service");
@@ -59,10 +60,10 @@ let AuthService = class AuthService {
             const user = await this.userRepository.findByEmail(email);
             if (!user) {
                 (0, logger_service_1.logWarn)(`Login failed — unknown email: ${email}`);
-                throw new common_1.UnauthorizedException('Invalid credentials');
+                throw new common_1.UnauthorizedException('Invalid email or password');
             }
             if (user.type !== type) {
-                throw new common_1.UnauthorizedException('Invalid credentials for this role');
+                throw new common_1.UnauthorizedException('Invalid email or password');
             }
             if (user.status === types_1.DBStatus.HOLD) {
                 throw new common_1.ForbiddenException('Account is blocked');
@@ -70,10 +71,23 @@ let AuthService = class AuthService {
             const valid = await helperFunction_utils_1.HelperFunctionUtils.comparePassword(password, user.password);
             if (!valid) {
                 (0, logger_service_1.logWarn)(`Login failed — bad password: ${email}`);
-                throw new common_1.UnauthorizedException('Invalid credentials');
+                throw new common_1.UnauthorizedException('Invalid email or password');
             }
             (0, logger_service_1.logInfo)(`User logged in: ${user._id}`);
             return this.buildAuthResponse(user);
+        };
+        this.selectSubscriber = async (userId, subscriberId) => {
+            const user = await this.userRepository.findById(userId);
+            if (!user)
+                throw new common_1.UnauthorizedException('Invalid User');
+            const ids = this.getSubscriberIds(user);
+            if (!ids.includes(subscriberId)) {
+                throw new common_1.ForbiddenException('Not a member of this subscriber group');
+            }
+            user.subscriberId = new mongoose_1.Types.ObjectId(subscriberId);
+            await this.userRepository.updateById(userId, { subscriberId: user.subscriberId });
+            const response = await this.buildAuthResponse(user);
+            return { ...response, requiresSubscriberSelection: false };
         };
         this.refresh = async (refreshToken) => {
             const refreshSecret = this.configService.get('JWT_REFRESH_SECRET') ||
@@ -142,8 +156,48 @@ let AuthService = class AuthService {
             type: user.type,
             phone: user.phone,
             subscriberId: user.subscriberId?.toString(),
+            subscriberIds: this.getSubscriberIds(user),
             subjects: user.subjects ?? [],
             status: user.status,
+        };
+    }
+    getSubscriberIds(user) {
+        const fromArray = (user.subscriberIds ?? []).map((id) => id.toString());
+        if (fromArray.length)
+            return fromArray;
+        if (user.subscriberId)
+            return [user.subscriberId.toString()];
+        return [];
+    }
+    async resolveSubscribers(ids) {
+        if (!ids.length)
+            return [];
+        const docs = await this.userRepository.findByIds(ids);
+        return docs.map((s) => ({
+            id: s._id.toString(),
+            fullName: s.fullName,
+            email: s.email,
+        }));
+    }
+    async buildAuthResponse(user) {
+        const userId = user._id.toString();
+        const subscriberIds = this.getSubscriberIds(user);
+        const activeSubscriberId = user.subscriberId?.toString() ?? subscriberIds[0];
+        const payload = {
+            sub: userId,
+            email: user.email,
+            type: user.type,
+            subscriberId: activeSubscriberId,
+        };
+        const tokens = this.buildTokens(payload);
+        await this.userRepository.updateRefreshToken(userId, tokens.refresh_token);
+        const subscribers = await this.resolveSubscribers(subscriberIds);
+        const requiresSelection = user.type === auth_type_1.UserType.USER && subscriberIds.length > 1;
+        return {
+            ...tokens,
+            user: this.toPublicUser(user),
+            subscribers,
+            requiresSubscriberSelection: requiresSelection,
         };
     }
     buildTokens(payload) {
@@ -158,21 +212,6 @@ let AuthService = class AuthService {
             expiresIn: refreshExpires,
         });
         return { access_token, refresh_token };
-    }
-    async buildAuthResponse(user) {
-        const userId = user._id.toString();
-        const payload = {
-            sub: userId,
-            email: user.email,
-            type: user.type,
-            subscriberId: user.subscriberId?.toString(),
-        };
-        const tokens = this.buildTokens(payload);
-        await this.userRepository.updateRefreshToken(userId, tokens.refresh_token);
-        return {
-            ...tokens,
-            user: this.toPublicUser(user),
-        };
     }
 };
 exports.AuthService = AuthService;

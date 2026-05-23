@@ -8,6 +8,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as jwt from 'jsonwebtoken';
+import { Types } from 'mongoose';
 import { UserDocument } from 'src/database/schema/user.schema';
 import { UserRepository } from 'src/database/repositories/user.repository';
 import { HelperFunctionUtils } from 'src/helpers/helperFunction.utils';
@@ -62,11 +63,11 @@ export class AuthService {
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
       logWarn(`Login failed — unknown email: ${email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     if (user.type !== type) {
-      throw new UnauthorizedException('Invalid credentials for this role');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     if (user.status === DBStatus.HOLD) {
@@ -76,11 +77,26 @@ export class AuthService {
     const valid = await HelperFunctionUtils.comparePassword(password, user.password);
     if (!valid) {
       logWarn(`Login failed — bad password: ${email}`);
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException('Invalid email or password');
     }
 
     logInfo(`User logged in: ${user._id}`);
     return this.buildAuthResponse(user);
+  };
+
+  selectSubscriber = async (userId: string, subscriberId: string) => {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new UnauthorizedException('Invalid User');
+
+    const ids = this.getSubscriberIds(user);
+    if (!ids.includes(subscriberId)) {
+      throw new ForbiddenException('Not a member of this subscriber group');
+    }
+
+    user.subscriberId = new Types.ObjectId(subscriberId);
+    await this.userRepository.updateById(userId, { subscriberId: user.subscriberId });
+    const response = await this.buildAuthResponse(user);
+    return { ...response, requiresSubscriberSelection: false };
   };
 
   refresh = async (refreshToken: string) => {
@@ -154,8 +170,48 @@ export class AuthService {
       type: user.type,
       phone: user.phone,
       subscriberId: user.subscriberId?.toString(),
+      subscriberIds: this.getSubscriberIds(user),
       subjects: user.subjects ?? [],
       status: user.status,
+    };
+  }
+
+  private getSubscriberIds(user: UserDocument): string[] {
+    const fromArray = (user.subscriberIds ?? []).map((id) => id.toString());
+    if (fromArray.length) return fromArray;
+    if (user.subscriberId) return [user.subscriberId.toString()];
+    return [];
+  }
+
+  private async resolveSubscribers(ids: string[]) {
+    if (!ids.length) return [];
+    const docs = await this.userRepository.findByIds(ids);
+    return docs.map((s) => ({
+      id: s._id.toString(),
+      fullName: s.fullName,
+      email: s.email,
+    }));
+  }
+
+  private async buildAuthResponse(user: UserDocument) {
+    const userId = user._id.toString();
+    const subscriberIds = this.getSubscriberIds(user);
+    const activeSubscriberId = user.subscriberId?.toString() ?? subscriberIds[0];
+    const payload: JwTPayloadType = {
+      sub: userId,
+      email: user.email,
+      type: user.type,
+      subscriberId: activeSubscriberId,
+    };
+    const tokens = this.buildTokens(payload);
+    await this.userRepository.updateRefreshToken(userId, tokens.refresh_token);
+    const subscribers = await this.resolveSubscribers(subscriberIds);
+    const requiresSelection = user.type === UserType.USER && subscriberIds.length > 1;
+    return {
+      ...tokens,
+      user: this.toPublicUser(user),
+      subscribers,
+      requiresSubscriberSelection: requiresSelection,
     };
   }
 
@@ -179,21 +235,5 @@ export class AuthService {
     });
 
     return { access_token, refresh_token };
-  }
-
-  private async buildAuthResponse(user: UserDocument) {
-    const userId = user._id.toString();
-    const payload: JwTPayloadType = {
-      sub: userId,
-      email: user.email,
-      type: user.type,
-      subscriberId: user.subscriberId?.toString(),
-    };
-    const tokens = this.buildTokens(payload);
-    await this.userRepository.updateRefreshToken(userId, tokens.refresh_token);
-    return {
-      ...tokens,
-      user: this.toPublicUser(user),
-    };
   }
 }

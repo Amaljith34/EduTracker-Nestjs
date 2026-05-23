@@ -44,6 +44,7 @@ export class UsersService {
       password: hashedPassword,
       type: UserType.USER,
       subscriberId: new Types.ObjectId(subscriberId),
+      subscriberIds: [new Types.ObjectId(subscriberId)],
       subjects: dto.subjects ?? [],
       status: DBStatus.ACTIVE,
       createdBy: new Types.ObjectId(authUser.userId),

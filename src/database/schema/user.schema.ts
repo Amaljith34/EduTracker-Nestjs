@@ -31,6 +31,9 @@ export class User {
   @Prop({ type: SchemaTypes.ObjectId, ref: 'User', index: true })
   subscriberId?: Types.ObjectId;
 
+  @Prop({ type: [SchemaTypes.ObjectId], ref: 'User', default: [] })
+  subscriberIds?: Types.ObjectId[];
+
   @Prop({ type: [UserSubjectSchema], default: [] })
   subjects: UserSubject[];
 

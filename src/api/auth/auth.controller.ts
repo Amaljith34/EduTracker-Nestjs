@@ -11,6 +11,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { SelectSubscriberDto } from './dto/select-subscriber.dto';
 import { AuthGuard } from './guard/auth.guard';
 import { AuthGuardPermissions } from './decorators/authGuardPermisssion';
 import { AuthUser } from './decorators/authUser';
@@ -79,5 +80,19 @@ export class AuthController {
   ) {
     logInfo(`Profile update: ${authUser.userId}`);
     return this.authService.updateProfile(authUser.userId, dto);
+  }
+
+  @ApiBearerAuth('Token')
+  @UseGuards(AuthGuard)
+  @AuthGuardPermissions({
+    allowedUsers: [UserType.USER],
+  })
+  @Post('/select-subscriber')
+  @HttpCode(200)
+  selectSubscriber(
+    @AuthUser() authUser: AuthUserPayload,
+    @Body() dto: SelectSubscriberDto,
+  ) {
+    return this.authService.selectSubscriber(authUser.userId, dto.subscriberId);
   }
 }

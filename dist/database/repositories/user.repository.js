@@ -30,6 +30,9 @@ let UserRepository = class UserRepository {
     findById(id) {
         return this.userModel.findById(id);
     }
+    findByIds(ids) {
+        return this.userModel.find({ _id: { $in: ids.map((id) => new mongoose_2.Types.ObjectId(id)) } });
+    }
     findByIdWithRefresh(id) {
         return this.userModel.findById(id).select('+refreshToken');
     }

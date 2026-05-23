@@ -20,6 +20,10 @@ export class UserRepository {
     return this.userModel.findById(id);
   }
 
+  findByIds(ids: string[]) {
+    return this.userModel.find({ _id: { $in: ids.map((id) => new Types.ObjectId(id)) } });
+  }
+
   findByIdWithRefresh(id: string) {
     return this.userModel.findById(id).select('+refreshToken');
   }

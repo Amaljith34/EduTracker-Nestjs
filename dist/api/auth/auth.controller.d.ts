@@ -3,6 +3,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { SelectSubscriberDto } from './dto/select-subscriber.dto';
 import { AuthUserPayload, UserType } from './auth.type';
 export declare class AuthController {
     private authService;
@@ -15,9 +16,16 @@ export declare class AuthController {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: import("../../database/types").DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
         access_token: string;
         refresh_token: string;
     }>;
@@ -29,9 +37,16 @@ export declare class AuthController {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: import("../../database/types").DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
         access_token: string;
         refresh_token: string;
     }>;
@@ -43,9 +58,16 @@ export declare class AuthController {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: import("../../database/types").DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
         access_token: string;
         refresh_token: string;
     }>;
@@ -59,6 +81,7 @@ export declare class AuthController {
         type: UserType;
         phone: string;
         subscriberId: string;
+        subscriberIds: string[];
         subjects: import("../../database/schema/user-subject.schema").UserSubject[];
         status: import("../../database/types").DBStatus;
     }>;
@@ -69,7 +92,29 @@ export declare class AuthController {
         type: UserType;
         phone: string;
         subscriberId: string;
+        subscriberIds: string[];
         subjects: import("../../database/schema/user-subject.schema").UserSubject[];
         status: import("../../database/types").DBStatus;
+    }>;
+    selectSubscriber(authUser: AuthUserPayload, dto: SelectSubscriberDto): Promise<{
+        requiresSubscriberSelection: boolean;
+        user: {
+            id: string;
+            email: string;
+            fullName: string;
+            type: UserType;
+            phone: string;
+            subscriberId: string;
+            subscriberIds: string[];
+            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            status: import("../../database/types").DBStatus;
+        };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        access_token: string;
+        refresh_token: string;
     }>;
 }

@@ -19,9 +19,16 @@ export declare class AuthService {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
         access_token: string;
         refresh_token: string;
     }>;
@@ -33,9 +40,37 @@ export declare class AuthService {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
+        access_token: string;
+        refresh_token: string;
+    }>;
+    selectSubscriber: (userId: string, subscriberId: string) => Promise<{
+        requiresSubscriberSelection: boolean;
+        user: {
+            id: string;
+            email: string;
+            fullName: string;
+            type: UserType;
+            phone: string;
+            subscriberId: string;
+            subscriberIds: string[];
+            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            status: DBStatus;
+        };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
         access_token: string;
         refresh_token: string;
     }>;
@@ -47,9 +82,16 @@ export declare class AuthService {
             type: UserType;
             phone: string;
             subscriberId: string;
+            subscriberIds: string[];
             subjects: import("../../database/schema/user-subject.schema").UserSubject[];
             status: DBStatus;
         };
+        subscribers: {
+            id: string;
+            fullName: string;
+            email: string;
+        }[];
+        requiresSubscriberSelection: boolean;
         access_token: string;
         refresh_token: string;
     }>;
@@ -63,6 +105,7 @@ export declare class AuthService {
         type: UserType;
         phone: string;
         subscriberId: string;
+        subscriberIds: string[];
         subjects: import("../../database/schema/user-subject.schema").UserSubject[];
         status: DBStatus;
     }>;
@@ -73,10 +116,13 @@ export declare class AuthService {
         type: UserType;
         phone: string;
         subscriberId: string;
+        subscriberIds: string[];
         subjects: import("../../database/schema/user-subject.schema").UserSubject[];
         status: DBStatus;
     }>;
     private toPublicUser;
-    private buildTokens;
+    private getSubscriberIds;
+    private resolveSubscribers;
     private buildAuthResponse;
+    private buildTokens;
 }

@@ -20,6 +20,7 @@ const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
 const refresh_token_dto_1 = require("./dto/refresh-token.dto");
 const update_profile_dto_1 = require("./dto/update-profile.dto");
+const select_subscriber_dto_1 = require("./dto/select-subscriber.dto");
 const auth_guard_1 = require("./guard/auth.guard");
 const authGuardPermisssion_1 = require("./decorators/authGuardPermisssion");
 const authUser_1 = require("./decorators/authUser");
@@ -50,6 +51,9 @@ let AuthController = class AuthController {
     updateProfile(authUser, dto) {
         (0, logger_service_1.logInfo)(`Profile update: ${authUser.userId}`);
         return this.authService.updateProfile(authUser.userId, dto);
+    }
+    selectSubscriber(authUser, dto) {
+        return this.authService.selectSubscriber(authUser.userId, dto.subscriberId);
     }
 };
 exports.AuthController = AuthController;
@@ -118,6 +122,20 @@ __decorate([
     __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "updateProfile", null);
+__decorate([
+    (0, swagger_1.ApiBearerAuth)('Token'),
+    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
+    (0, authGuardPermisssion_1.AuthGuardPermissions)({
+        allowedUsers: [auth_type_1.UserType.USER],
+    }),
+    (0, common_1.Post)('/select-subscriber'),
+    (0, common_1.HttpCode)(200),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, select_subscriber_dto_1.SelectSubscriberDto]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "selectSubscriber", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     (0, swagger_1.ApiTags)('Auth'),
