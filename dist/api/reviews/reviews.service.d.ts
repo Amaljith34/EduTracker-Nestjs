@@ -29,6 +29,8 @@ export declare class ReviewsService {
         };
     }>;
     update(authUser: AuthUserPayload, id: string, dto: UpdateReviewDto): Promise<import("../../database/schema/review.schema").ReviewDocument>;
-    remove(authUser: AuthUserPayload, id: string): Promise<void>;
+    remove(authUser: AuthUserPayload, id: string): Promise<{
+        message: string;
+    }>;
     private assertReviewAccess;
 }

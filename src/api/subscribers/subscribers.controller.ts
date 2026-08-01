@@ -18,6 +18,7 @@ import { SubscribersService } from './subscribers.service';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
 import { FilterUserDto } from '../user/dto/filterUser.dto';
+import { DBStatus } from 'src/database/types';
 
 @Controller('subscribers')
 @ApiTags('Subscribers')
@@ -50,6 +51,16 @@ export class SubscribersController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateSubscriberDto) {
     return this.subscribersService.update(id, dto);
+  }
+
+  @Patch(':id/block')
+  block(@Param('id') id: string) {
+    return this.subscribersService.setStatus(id, DBStatus.HOLD);
+  }
+
+  @Patch(':id/unblock')
+  unblock(@Param('id') id: string) {
+    return this.subscribersService.setStatus(id, DBStatus.ACTIVE);
   }
 
   @Delete(':id')

@@ -17,18 +17,22 @@ const user_repository_1 = require("../../database/repositories/user.repository")
 const review_calculator_helper_1 = require("../../helpers/review-calculator.helper");
 const pagination_helper_1 = require("../../helpers/pagination.helper");
 const auth_type_1 = require("../auth/auth.type");
+const types_1 = require("../../database/types");
 let ReviewsService = class ReviewsService {
     constructor(reviewRepository, userRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
     }
     buildScopeFilter(authUser) {
+        const base = {
+            status: { $ne: types_1.RecordStatus.DELETED },
+        };
         if (authUser.type === auth_type_1.UserType.ADMIN)
-            return {};
+            return base;
         if (authUser.type === auth_type_1.UserType.SUBSCRIBER) {
-            return { subscriberId: new mongoose_1.Types.ObjectId(authUser.userId) };
+            return { ...base, subscriberId: new mongoose_1.Types.ObjectId(authUser.userId) };
         }
-        return { userId: new mongoose_1.Types.ObjectId(authUser.userId) };
+        return { ...base, userId: new mongoose_1.Types.ObjectId(authUser.userId) };
     }
     async create(authUser, dto) {
         if (authUser.type === auth_type_1.UserType.USER) {
@@ -60,7 +64,10 @@ let ReviewsService = class ReviewsService {
             finalAmount,
             date: new Date(dto.date),
             notes: dto.notes,
+            status: types_1.RecordStatus.APPROVED,
         });
+        const pendingAmount = Number(((endUser.pendingAmount || 0) + finalAmount).toFixed(2));
+        await this.userRepository.updateById(dto.userId, { pendingAmount });
         return review;
     }
     async findAll(authUser, query) {
@@ -70,9 +77,11 @@ let ReviewsService = class ReviewsService {
     }
     async update(authUser, id, dto) {
         const review = await this.reviewRepository.findById(id);
-        if (!review)
+        if (!review || review.status === types_1.RecordStatus.DELETED) {
             throw new common_1.NotFoundException('Review not found');
+        }
         this.assertReviewAccess(authUser, review);
+        const previousAmount = review.finalAmount;
         if (dto.subjectName || dto.hours !== undefined) {
             const endUser = await this.userRepository.findById(review.userId.toString());
             const subjectName = dto.subjectName ?? review.subjectName;
@@ -93,14 +102,33 @@ let ReviewsService = class ReviewsService {
             review.date = new Date(dto.date);
         if (dto.notes !== undefined)
             review.notes = dto.notes;
-        return this.reviewRepository.save(review);
+        if (dto.status)
+            review.status = dto.status;
+        const saved = await this.reviewRepository.save(review);
+        const delta = saved.finalAmount - previousAmount;
+        if (delta !== 0) {
+            const endUser = await this.userRepository.findById(review.userId.toString());
+            if (endUser) {
+                const pendingAmount = Math.max(0, Number(((endUser.pendingAmount || 0) + delta).toFixed(2)));
+                await this.userRepository.updateById(endUser._id.toString(), { pendingAmount });
+            }
+        }
+        return saved;
     }
     async remove(authUser, id) {
         const review = await this.reviewRepository.findById(id);
-        if (!review)
+        if (!review || review.status === types_1.RecordStatus.DELETED) {
             throw new common_1.NotFoundException('Review not found');
+        }
         this.assertReviewAccess(authUser, review);
-        await this.reviewRepository.remove(review);
+        review.status = types_1.RecordStatus.DELETED;
+        await this.reviewRepository.save(review);
+        const endUser = await this.userRepository.findById(review.userId.toString());
+        if (endUser) {
+            const pendingAmount = Math.max(0, Number(((endUser.pendingAmount || 0) - review.finalAmount).toFixed(2)));
+            await this.userRepository.updateById(endUser._id.toString(), { pendingAmount });
+        }
+        return { message: 'Review deleted' };
     }
     assertReviewAccess(authUser, review) {
         if (authUser.type === auth_type_1.UserType.ADMIN)

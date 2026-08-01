@@ -15,6 +15,7 @@ export declare class User {
         subjectName: string;
         amountPerHour: number;
     }[];
+    pendingAmount: number;
     refreshToken?: string;
     createdBy?: Types.ObjectId;
 }

@@ -5,7 +5,16 @@ import { PaginationQuery } from 'src/helpers/pagination.helper';
 export declare class UserRepository {
     private readonly userModel;
     constructor(userModel: Model<UserDocument>);
-    findByEmail(email: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, UserDocument, {}, {}> & User & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+    findByEmail(email: string, type?: UserType): import("mongoose").Query<import("mongoose").Document<unknown, {}, UserDocument, {}, {}> & User & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, import("mongoose").Document<unknown, {}, UserDocument, {}, {}> & User & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
+        _id: Types.ObjectId;
+    }> & {
+        __v: number;
+    }, {}, UserDocument, "findOne", {}>;
+    findByEmailIncludingDeleted(email: string): import("mongoose").Query<import("mongoose").Document<unknown, {}, UserDocument, {}, {}> & User & import("mongoose").Document<Types.ObjectId, any, any, Record<string, any>, {}> & Required<{
         _id: Types.ObjectId;
     }> & {
         __v: number;

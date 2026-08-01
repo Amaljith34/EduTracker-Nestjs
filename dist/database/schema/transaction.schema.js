@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TransactionSchema = exports.Transaction = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const types_1 = require("../types");
 let Transaction = class Transaction {
 };
 exports.Transaction = Transaction;
@@ -35,6 +36,15 @@ __decorate([
     (0, mongoose_1.Prop)({ trim: true, default: '' }),
     __metadata("design:type", String)
 ], Transaction.prototype, "notes", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: String,
+        enum: types_1.RecordStatus,
+        default: types_1.RecordStatus.APPROVED,
+        index: true,
+    }),
+    __metadata("design:type", String)
+], Transaction.prototype, "status", void 0);
 exports.Transaction = Transaction = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true, collection: 'transactions' })
 ], Transaction);

@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { RecordStatus } from '../types';
 export type TransactionDocument = Transaction & Document;
 export declare class Transaction {
     userId: Types.ObjectId;
@@ -6,6 +7,7 @@ export declare class Transaction {
     amountPaid: number;
     paymentDate: Date;
     notes?: string;
+    status: RecordStatus;
 }
 export declare const TransactionSchema: import("mongoose").Schema<Transaction, import("mongoose").Model<Transaction, any, any, any, Document<unknown, any, Transaction, any, {}> & Transaction & {
     _id: Types.ObjectId;

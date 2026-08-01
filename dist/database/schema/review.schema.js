@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewSchema = exports.Review = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const types_1 = require("../types");
 let Review = class Review {
 };
 exports.Review = Review;
@@ -51,10 +52,20 @@ __decorate([
     (0, mongoose_1.Prop)({ trim: true, default: '' }),
     __metadata("design:type", String)
 ], Review.prototype, "notes", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
+        type: String,
+        enum: types_1.RecordStatus,
+        default: types_1.RecordStatus.APPROVED,
+        index: true,
+    }),
+    __metadata("design:type", String)
+], Review.prototype, "status", void 0);
 exports.Review = Review = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true, collection: 'reviews' })
 ], Review);
 exports.ReviewSchema = mongoose_1.SchemaFactory.createForClass(Review);
 exports.ReviewSchema.index({ subscriberId: 1, date: -1 });
 exports.ReviewSchema.index({ userId: 1, date: -1 });
+exports.ReviewSchema.index({ subjectName: 1, date: -1 });
 //# sourceMappingURL=review.schema.js.map

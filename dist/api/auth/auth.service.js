@@ -37,32 +37,45 @@ let AuthService = class AuthService {
             if (userType === auth_type_1.UserType.USER) {
                 throw new common_1.ForbiddenException('Users must be created by a subscriber or admin');
             }
-            const existing = await this.userRepository.findByEmail(email);
-            if (existing) {
+            const existingActive = await this.userRepository.findByEmail(email);
+            if (existingActive) {
                 (0, logger_service_1.logWarn)(`Register failed — email exists: ${email}`);
                 throw new common_1.ConflictException('Email already in use');
             }
             const hashedPassword = await helperFunction_utils_1.HelperFunctionUtils.hashPassword(password);
-            const user = await this.userRepository.create({
-                email,
-                fullName,
-                phone,
-                password: hashedPassword,
-                type: userType,
-                status: types_1.DBStatus.ACTIVE,
-                subjects: [],
-            });
+            const softDeleted = await this.userRepository.findByEmailIncludingDeleted(email);
+            let user;
+            if (softDeleted && softDeleted.status === types_1.DBStatus.DELETED) {
+                const updated = await this.userRepository.updateById(softDeleted._id.toString(), {
+                    fullName,
+                    phone,
+                    password: hashedPassword,
+                    type: userType,
+                    status: types_1.DBStatus.ACTIVE,
+                    subjects: [],
+                });
+                user = updated;
+            }
+            else {
+                user = await this.userRepository.create({
+                    email,
+                    fullName,
+                    phone,
+                    password: hashedPassword,
+                    type: userType,
+                    status: types_1.DBStatus.ACTIVE,
+                    subjects: [],
+                    pendingAmount: 0,
+                });
+            }
             (0, logger_service_1.logInfo)(`User registered: ${user._id} as ${userType}`);
             return this.buildAuthResponse(user);
         };
         this.login = async (loginDto) => {
             const { email, password, type } = loginDto;
-            const user = await this.userRepository.findByEmail(email);
+            const user = await this.userRepository.findByEmail(email, type);
             if (!user) {
                 (0, logger_service_1.logWarn)(`Login failed — unknown email: ${email}`);
-                throw new common_1.UnauthorizedException('Invalid email or password');
-            }
-            if (user.type !== type) {
                 throw new common_1.UnauthorizedException('Invalid email or password');
             }
             if (user.status === types_1.DBStatus.HOLD) {

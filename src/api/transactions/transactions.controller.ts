@@ -44,6 +44,17 @@ export class TransactionsController {
     return this.transactionsService.findAll(authUser, query);
   }
 
+  @Get('balance/:userId')
+  @AuthGuardPermissions({
+    allowedUsers: [UserType.ADMIN, UserType.SUBSCRIBER],
+  })
+  getBalance(
+    @AuthUser() authUser: AuthUserPayload,
+    @Param('userId') userId: string,
+  ) {
+    return this.transactionsService.getBalanceForUser(authUser, userId);
+  }
+
   @Patch(':id')
   @AuthGuardPermissions({ allowedUsers: [UserType.ADMIN, UserType.SUBSCRIBER] })
   update(

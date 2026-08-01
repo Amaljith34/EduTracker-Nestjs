@@ -24,8 +24,19 @@ let UserRepository = class UserRepository {
     constructor(userModel) {
         this.userModel = userModel;
     }
-    findByEmail(email) {
-        return this.userModel.findOne({ email }).select('+password +refreshToken');
+    findByEmail(email, type) {
+        const filter = {
+            email: email.trim().toLowerCase(),
+            status: { $ne: types_1.DBStatus.DELETED },
+        };
+        if (type)
+            filter.type = type;
+        return this.userModel.findOne(filter).select('+password +refreshToken');
+    }
+    findByEmailIncludingDeleted(email) {
+        return this.userModel
+            .findOne({ email: email.trim().toLowerCase() })
+            .select('+password +refreshToken');
     }
     findById(id) {
         return this.userModel.findById(id);

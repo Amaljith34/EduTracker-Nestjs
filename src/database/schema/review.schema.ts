@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
+import { RecordStatus } from '../types';
 
 export type ReviewDocument = Review & Document;
 
@@ -31,8 +32,17 @@ export class Review {
 
   @Prop({ trim: true, default: '' })
   notes?: string;
+
+  @Prop({
+    type: String,
+    enum: RecordStatus,
+    default: RecordStatus.APPROVED,
+    index: true,
+  })
+  status: RecordStatus;
 }
 
 export const ReviewSchema = SchemaFactory.createForClass(Review);
 ReviewSchema.index({ subscriberId: 1, date: -1 });
 ReviewSchema.index({ userId: 1, date: -1 });
+ReviewSchema.index({ subjectName: 1, date: -1 });

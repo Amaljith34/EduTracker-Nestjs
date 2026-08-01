@@ -1,38 +1,51 @@
+import { AuthUserPayload } from '../auth/auth.type';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 export declare class SubjectsController {
     private readonly subjectsService;
     constructor(subjectsService: SubjectsService);
-    create(dto: CreateSubjectDto): Promise<{
+    create(authUser: AuthUserPayload, dto: CreateSubjectDto): Promise<{
         subjectId: string;
         subjectName: string;
         status: import("../../database/schema/subject-catalog.schema").SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(status?: string): Promise<{
+    findAll(authUser: AuthUserPayload, status?: string): Promise<{
         subjectId: string;
         subjectName: string;
         status: import("../../database/schema/subject-catalog.schema").SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }[]>;
-    findOne(id: string): Promise<{
+    findOne(authUser: AuthUserPayload, id: string): Promise<{
         subjectId: string;
         subjectName: string;
         status: import("../../database/schema/subject-catalog.schema").SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    update(id: string, dto: UpdateSubjectDto): Promise<{
+    update(authUser: AuthUserPayload, id: string, dto: UpdateSubjectDto): Promise<{
         subjectId: string;
         subjectName: string;
         status: import("../../database/schema/subject-catalog.schema").SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    remove(id: string): Promise<{
+    remove(authUser: AuthUserPayload, id: string): Promise<{
         message: string;
     }>;
 }

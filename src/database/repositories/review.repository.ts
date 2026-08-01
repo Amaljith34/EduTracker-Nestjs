@@ -5,6 +5,7 @@ import { Review, ReviewDocument } from '../schema/review.schema';
 import { DbHelpers } from 'src/utils/helper/database/db.helpers';
 import { getPagination, PaginationQuery } from 'src/helpers/pagination.helper';
 import { dateRangeMatch, resolveDateRange, DateFilterQuery } from 'src/helpers/date-filter.helper';
+import { RecordStatus } from '../types';
 
 @Injectable()
 export class ReviewRepository {
@@ -37,12 +38,21 @@ export class ReviewRepository {
     const { page, limit, skip, sort } = getPagination(query);
     const { fromDate, toDate } = resolveDateRange(query);
     const mongoFilter: FilterQuery<ReviewDocument> = {
+      status: { $ne: RecordStatus.DELETED },
       ...filter,
       ...dateRangeMatch('date', fromDate, toDate),
     };
 
     if (query.userId) {
       mongoFilter.userId = new Types.ObjectId(query.userId);
+    }
+    if ((query as { subjectName?: string }).subjectName) {
+      mongoFilter.subjectName = {
+        $regex: new RegExp(
+          `^${(query as { subjectName: string }).subjectName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`,
+          'i',
+        ),
+      };
     }
     if ((query as { subscriberId?: string }).subscriberId) {
       mongoFilter.subscriberId = new Types.ObjectId(

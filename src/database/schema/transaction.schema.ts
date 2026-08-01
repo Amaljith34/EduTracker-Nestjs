@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
+import { RecordStatus } from '../types';
 
 export type TransactionDocument = Transaction & Document;
 
@@ -19,6 +20,14 @@ export class Transaction {
 
   @Prop({ trim: true, default: '' })
   notes?: string;
+
+  @Prop({
+    type: String,
+    enum: RecordStatus,
+    default: RecordStatus.APPROVED,
+    index: true,
+  })
+  status: RecordStatus;
 }
 
 export const TransactionSchema = SchemaFactory.createForClass(Transaction);

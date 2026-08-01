@@ -23,7 +23,11 @@ __decorate([
     __metadata("design:type", String)
 ], CreateSubjectDto.prototype, "subjectName", void 0);
 __decorate([
-    (0, swagger_1.ApiPropertyOptional)({ enum: subject_catalog_schema_1.SubjectStatus, default: subject_catalog_schema_1.SubjectStatus.ACTIVE }),
+    (0, swagger_1.ApiPropertyOptional)({
+        enum: subject_catalog_schema_1.SubjectStatus,
+        default: subject_catalog_schema_1.SubjectStatus.ACTIVE,
+        description: 'Ignored for Subscriber creators (always Hold)',
+    }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsEnum)(subject_catalog_schema_1.SubjectStatus),
     __metadata("design:type", String)

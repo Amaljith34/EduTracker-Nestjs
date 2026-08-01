@@ -20,6 +20,7 @@ const review_schema_1 = require("../schema/review.schema");
 const db_helpers_1 = require("../../utils/helper/database/db.helpers");
 const pagination_helper_1 = require("../../helpers/pagination.helper");
 const date_filter_helper_1 = require("../../helpers/date-filter.helper");
+const types_1 = require("../types");
 let ReviewRepository = class ReviewRepository {
     constructor(reviewModel) {
         this.reviewModel = reviewModel;
@@ -42,11 +43,17 @@ let ReviewRepository = class ReviewRepository {
         const { page, limit, skip, sort } = (0, pagination_helper_1.getPagination)(query);
         const { fromDate, toDate } = (0, date_filter_helper_1.resolveDateRange)(query);
         const mongoFilter = {
+            status: { $ne: types_1.RecordStatus.DELETED },
             ...filter,
             ...(0, date_filter_helper_1.dateRangeMatch)('date', fromDate, toDate),
         };
         if (query.userId) {
             mongoFilter.userId = new mongoose_2.Types.ObjectId(query.userId);
+        }
+        if (query.subjectName) {
+            mongoFilter.subjectName = {
+                $regex: new RegExp(`^${query.subjectName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i'),
+            };
         }
         if (query.subscriberId) {
             mongoFilter.subscriberId = new mongoose_2.Types.ObjectId(query.subscriberId);

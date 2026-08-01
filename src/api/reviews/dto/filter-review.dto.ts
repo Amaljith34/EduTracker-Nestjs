@@ -28,6 +28,11 @@ export class FilterReviewDto implements PaginationQuery, DateFilterQuery {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  subjectName?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   fromDate?: string;
 
   @ApiPropertyOptional()

@@ -6,6 +6,7 @@ export declare class FilterReviewDto implements PaginationQuery, DateFilterQuery
     sortBy?: string;
     sortOrder?: 'asc' | 'desc';
     userId?: string;
+    subjectName?: string;
     fromDate?: string;
     toDate?: string;
     period?: 'week' | 'month' | 'year';

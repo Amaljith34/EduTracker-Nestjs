@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { DBStatus } from 'src/database/types';
 
 export class FilterUserDto {
   @ApiPropertyOptional({ description: 'Search term for user name or email' })
@@ -24,4 +25,9 @@ export class FilterUserDto {
   @IsOptional()
   @IsString()
   subscriberId?: string;
+
+  @ApiPropertyOptional({ enum: DBStatus, description: 'Filter by status' })
+  @IsOptional()
+  @IsEnum(DBStatus)
+  status?: DBStatus;
 }

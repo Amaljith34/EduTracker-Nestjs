@@ -38,35 +38,47 @@ export class AuthService {
       throw new ForbiddenException('Users must be created by a subscriber or admin');
     }
 
-    const existing = await this.userRepository.findByEmail(email);
-    if (existing) {
+    const existingActive = await this.userRepository.findByEmail(email);
+    if (existingActive) {
       logWarn(`Register failed — email exists: ${email}`);
       throw new ConflictException('Email already in use');
     }
 
     const hashedPassword = await HelperFunctionUtils.hashPassword(password);
-    const user = await this.userRepository.create({
-      email,
-      fullName,
-      phone,
-      password: hashedPassword,
-      type: userType,
-      status: DBStatus.ACTIVE,
-      subjects: [],
-    });
+    const softDeleted = await this.userRepository.findByEmailIncludingDeleted(email);
+
+    let user: UserDocument;
+    if (softDeleted && softDeleted.status === DBStatus.DELETED) {
+      const updated = await this.userRepository.updateById(softDeleted._id.toString(), {
+        fullName,
+        phone,
+        password: hashedPassword,
+        type: userType,
+        status: DBStatus.ACTIVE,
+        subjects: [],
+      });
+      user = updated!;
+    } else {
+      user = await this.userRepository.create({
+        email,
+        fullName,
+        phone,
+        password: hashedPassword,
+        type: userType,
+        status: DBStatus.ACTIVE,
+        subjects: [],
+        pendingAmount: 0,
+      });
+    }
     logInfo(`User registered: ${user._id} as ${userType}`);
     return this.buildAuthResponse(user);
   };
 
   login = async (loginDto: LoginDto) => {
     const { email, password, type } = loginDto;
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this.userRepository.findByEmail(email, type);
     if (!user) {
       logWarn(`Login failed — unknown email: ${email}`);
-      throw new UnauthorizedException('Invalid email or password');
-    }
-
-    if (user.type !== type) {
       throw new UnauthorizedException('Invalid email or password');
     }
 

@@ -5,6 +5,7 @@ import { Transaction, TransactionDocument } from '../schema/transaction.schema';
 import { DbHelpers } from 'src/utils/helper/database/db.helpers';
 import { getPagination, PaginationQuery } from 'src/helpers/pagination.helper';
 import { dateRangeMatch, resolveDateRange, DateFilterQuery } from 'src/helpers/date-filter.helper';
+import { RecordStatus } from '../types';
 
 @Injectable()
 export class TransactionRepository {
@@ -29,6 +30,7 @@ export class TransactionRepository {
     const { page, limit, skip, sort } = getPagination(query);
     const { fromDate, toDate } = resolveDateRange(query);
     const mongoFilter: FilterQuery<TransactionDocument> = {
+      status: { $ne: RecordStatus.DELETED },
       ...filter,
       ...dateRangeMatch('paymentDate', fromDate, toDate),
     };

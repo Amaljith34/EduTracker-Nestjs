@@ -8,7 +8,11 @@ export class CreateSubjectDto {
   @MinLength(2)
   subjectName: string;
 
-  @ApiPropertyOptional({ enum: SubjectStatus, default: SubjectStatus.ACTIVE })
+  @ApiPropertyOptional({
+    enum: SubjectStatus,
+    default: SubjectStatus.ACTIVE,
+    description: 'Ignored for Subscriber creators (always Hold)',
+  })
   @IsOptional()
   @IsEnum(SubjectStatus)
   status?: SubjectStatus;

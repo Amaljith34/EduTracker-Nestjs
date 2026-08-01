@@ -12,7 +12,8 @@ import {
 import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/guard/auth.guard';
 import { AuthGuardPermissions } from '../auth/decorators/authGuardPermisssion';
-import { UserType } from '../auth/auth.type';
+import { AuthUser } from '../auth/decorators/authUser';
+import { AuthUserPayload, UserType } from '../auth/auth.type';
 import { SubjectsService } from './subjects.service';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
@@ -25,37 +26,50 @@ export class SubjectsController {
   constructor(private readonly subjectsService: SubjectsService) {}
 
   @Post()
-  @AuthGuardPermissions({ allowedUsers: [UserType.ADMIN] })
-  create(@Body() dto: CreateSubjectDto) {
-    return this.subjectsService.create(dto);
+  @AuthGuardPermissions({
+    allowedUsers: [UserType.ADMIN, UserType.SUBSCRIBER],
+  })
+  create(@AuthUser() authUser: AuthUserPayload, @Body() dto: CreateSubjectDto) {
+    return this.subjectsService.create(authUser, dto);
   }
 
   @Get()
   @AuthGuardPermissions({
     allowedUsers: [UserType.ADMIN, UserType.SUBSCRIBER, UserType.USER],
   })
-  @ApiQuery({ name: 'status', required: false, enum: ['active', 'inactive'] })
-  findAll(@Query('status') status?: string) {
-    return this.subjectsService.findAll(status);
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    enum: ['active', 'hold', 'inactive', 'deleted'],
+  })
+  findAll(
+    @AuthUser() authUser: AuthUserPayload,
+    @Query('status') status?: string,
+  ) {
+    return this.subjectsService.findAll(authUser, status);
   }
 
   @Get(':id')
   @AuthGuardPermissions({
     allowedUsers: [UserType.ADMIN, UserType.SUBSCRIBER, UserType.USER],
   })
-  findOne(@Param('id') id: string) {
-    return this.subjectsService.findOne(id);
+  findOne(@AuthUser() authUser: AuthUserPayload, @Param('id') id: string) {
+    return this.subjectsService.findOne(authUser, id);
   }
 
   @Patch(':id')
   @AuthGuardPermissions({ allowedUsers: [UserType.ADMIN] })
-  update(@Param('id') id: string, @Body() dto: UpdateSubjectDto) {
-    return this.subjectsService.update(id, dto);
+  update(
+    @AuthUser() authUser: AuthUserPayload,
+    @Param('id') id: string,
+    @Body() dto: UpdateSubjectDto,
+  ) {
+    return this.subjectsService.update(authUser, id, dto);
   }
 
   @Delete(':id')
   @AuthGuardPermissions({ allowedUsers: [UserType.ADMIN] })
-  remove(@Param('id') id: string) {
-    return this.subjectsService.remove(id);
+  remove(@AuthUser() authUser: AuthUserPayload, @Param('id') id: string) {
+    return this.subjectsService.remove(authUser, id);
   }
 }

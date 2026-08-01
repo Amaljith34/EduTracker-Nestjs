@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateReviewDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
+const types_1 = require("../../../database/types");
 class UpdateReviewDto {
 }
 exports.UpdateReviewDto = UpdateReviewDto;
@@ -47,4 +48,10 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], UpdateReviewDto.prototype, "notes", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({ enum: types_1.RecordStatus }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsEnum)(types_1.RecordStatus),
+    __metadata("design:type", String)
+], UpdateReviewDto.prototype, "status", void 0);
 //# sourceMappingURL=update-review.dto.js.map

@@ -20,6 +20,7 @@ const transaction_schema_1 = require("../schema/transaction.schema");
 const db_helpers_1 = require("../../utils/helper/database/db.helpers");
 const pagination_helper_1 = require("../../helpers/pagination.helper");
 const date_filter_helper_1 = require("../../helpers/date-filter.helper");
+const types_1 = require("../types");
 let TransactionRepository = class TransactionRepository {
     constructor(transactionModel) {
         this.transactionModel = transactionModel;
@@ -35,6 +36,7 @@ let TransactionRepository = class TransactionRepository {
         const { page, limit, skip, sort } = (0, pagination_helper_1.getPagination)(query);
         const { fromDate, toDate } = (0, date_filter_helper_1.resolveDateRange)(query);
         const mongoFilter = {
+            status: { $ne: types_1.RecordStatus.DELETED },
             ...filter,
             ...(0, date_filter_helper_1.dateRangeMatch)('paymentDate', fromDate, toDate),
         };

@@ -17,6 +17,7 @@ const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 const auth_guard_1 = require("../auth/guard/auth.guard");
 const authGuardPermisssion_1 = require("../auth/decorators/authGuardPermisssion");
+const authUser_1 = require("../auth/decorators/authUser");
 const auth_type_1 = require("../auth/auth.type");
 const subjects_service_1 = require("./subjects.service");
 const create_subject_dto_1 = require("./dto/create-subject.dto");
@@ -25,29 +26,32 @@ let SubjectsController = class SubjectsController {
     constructor(subjectsService) {
         this.subjectsService = subjectsService;
     }
-    create(dto) {
-        return this.subjectsService.create(dto);
+    create(authUser, dto) {
+        return this.subjectsService.create(authUser, dto);
     }
-    findAll(status) {
-        return this.subjectsService.findAll(status);
+    findAll(authUser, status) {
+        return this.subjectsService.findAll(authUser, status);
     }
-    findOne(id) {
-        return this.subjectsService.findOne(id);
+    findOne(authUser, id) {
+        return this.subjectsService.findOne(authUser, id);
     }
-    update(id, dto) {
-        return this.subjectsService.update(id, dto);
+    update(authUser, id, dto) {
+        return this.subjectsService.update(authUser, id, dto);
     }
-    remove(id) {
-        return this.subjectsService.remove(id);
+    remove(authUser, id) {
+        return this.subjectsService.remove(authUser, id);
     }
 };
 exports.SubjectsController = SubjectsController;
 __decorate([
     (0, common_1.Post)(),
-    (0, authGuardPermisssion_1.AuthGuardPermissions)({ allowedUsers: [auth_type_1.UserType.ADMIN] }),
-    __param(0, (0, common_1.Body)()),
+    (0, authGuardPermisssion_1.AuthGuardPermissions)({
+        allowedUsers: [auth_type_1.UserType.ADMIN, auth_type_1.UserType.SUBSCRIBER],
+    }),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [create_subject_dto_1.CreateSubjectDto]),
+    __metadata("design:paramtypes", [Object, create_subject_dto_1.CreateSubjectDto]),
     __metadata("design:returntype", void 0)
 ], SubjectsController.prototype, "create", null);
 __decorate([
@@ -55,10 +59,15 @@ __decorate([
     (0, authGuardPermisssion_1.AuthGuardPermissions)({
         allowedUsers: [auth_type_1.UserType.ADMIN, auth_type_1.UserType.SUBSCRIBER, auth_type_1.UserType.USER],
     }),
-    (0, swagger_1.ApiQuery)({ name: 'status', required: false, enum: ['active', 'inactive'] }),
-    __param(0, (0, common_1.Query)('status')),
+    (0, swagger_1.ApiQuery)({
+        name: 'status',
+        required: false,
+        enum: ['active', 'hold', 'inactive', 'deleted'],
+    }),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Query)('status')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], SubjectsController.prototype, "findAll", null);
 __decorate([
@@ -66,26 +75,29 @@ __decorate([
     (0, authGuardPermisssion_1.AuthGuardPermissions)({
         allowedUsers: [auth_type_1.UserType.ADMIN, auth_type_1.UserType.SUBSCRIBER, auth_type_1.UserType.USER],
     }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], SubjectsController.prototype, "findOne", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, authGuardPermisssion_1.AuthGuardPermissions)({ allowedUsers: [auth_type_1.UserType.ADMIN] }),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_subject_dto_1.UpdateSubjectDto]),
+    __metadata("design:paramtypes", [Object, String, update_subject_dto_1.UpdateSubjectDto]),
     __metadata("design:returntype", void 0)
 ], SubjectsController.prototype, "update", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, authGuardPermisssion_1.AuthGuardPermissions)({ allowedUsers: [auth_type_1.UserType.ADMIN] }),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", void 0)
 ], SubjectsController.prototype, "remove", null);
 exports.SubjectsController = SubjectsController = __decorate([

@@ -23,6 +23,7 @@ const subscribers_service_1 = require("./subscribers.service");
 const create_subscriber_dto_1 = require("./dto/create-subscriber.dto");
 const update_subscriber_dto_1 = require("./dto/update-subscriber.dto");
 const filterUser_dto_1 = require("../user/dto/filterUser.dto");
+const types_1 = require("../../database/types");
 let SubscribersController = class SubscribersController {
     constructor(subscribersService) {
         this.subscribersService = subscribersService;
@@ -41,6 +42,12 @@ let SubscribersController = class SubscribersController {
     }
     update(id, dto) {
         return this.subscribersService.update(id, dto);
+    }
+    block(id) {
+        return this.subscribersService.setStatus(id, types_1.DBStatus.HOLD);
+    }
+    unblock(id) {
+        return this.subscribersService.setStatus(id, types_1.DBStatus.ACTIVE);
     }
     remove(id) {
         return this.subscribersService.remove(id);
@@ -84,6 +91,20 @@ __decorate([
     __metadata("design:paramtypes", [String, update_subscriber_dto_1.UpdateSubscriberDto]),
     __metadata("design:returntype", void 0)
 ], SubscribersController.prototype, "update", null);
+__decorate([
+    (0, common_1.Patch)(':id/block'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SubscribersController.prototype, "block", null);
+__decorate([
+    (0, common_1.Patch)(':id/unblock'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], SubscribersController.prototype, "unblock", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),

@@ -12,8 +12,19 @@ export class UserRepository {
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
   ) {}
 
-  findByEmail(email: string) {
-    return this.userModel.findOne({ email }).select('+password +refreshToken');
+  findByEmail(email: string, type?: UserType) {
+    const filter: FilterQuery<UserDocument> = {
+      email: email.trim().toLowerCase(),
+      status: { $ne: DBStatus.DELETED },
+    };
+    if (type) filter.type = type;
+    return this.userModel.findOne(filter).select('+password +refreshToken');
+  }
+
+  findByEmailIncludingDeleted(email: string) {
+    return this.userModel
+      .findOne({ email: email.trim().toLowerCase() })
+      .select('+password +refreshToken');
   }
 
   findById(id: string) {

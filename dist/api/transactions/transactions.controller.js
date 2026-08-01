@@ -33,6 +33,9 @@ let TransactionsController = class TransactionsController {
     findAll(authUser, query) {
         return this.transactionsService.findAll(authUser, query);
     }
+    getBalance(authUser, userId) {
+        return this.transactionsService.getBalanceForUser(authUser, userId);
+    }
     update(authUser, id, dto) {
         return this.transactionsService.update(authUser, id, dto);
     }
@@ -61,6 +64,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, filter_transaction_dto_1.FilterTransactionDto]),
     __metadata("design:returntype", void 0)
 ], TransactionsController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('balance/:userId'),
+    (0, authGuardPermisssion_1.AuthGuardPermissions)({
+        allowedUsers: [auth_type_1.UserType.ADMIN, auth_type_1.UserType.SUBSCRIBER],
+    }),
+    __param(0, (0, authUser_1.AuthUser)()),
+    __param(1, (0, common_1.Param)('userId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", void 0)
+], TransactionsController.prototype, "getBalance", null);
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, authGuardPermisssion_1.AuthGuardPermissions)({ allowedUsers: [auth_type_1.UserType.ADMIN, auth_type_1.UserType.SUBSCRIBER] }),

@@ -11,16 +11,16 @@ export class User {
   @Prop({
     required: true,
     type: String,
-    unique: true,
     lowercase: true,
     trim: true,
+    index: true,
   })
   email: string;
 
   @Prop({ required: true, type: String })
   fullName: string;
 
-  @Prop({ type: String, trim: true, required: false })
+  @Prop({ type: String, trim: true, required: false, index: true })
   phone?: string;
 
   @Prop({ required: true, select: false })
@@ -54,6 +54,10 @@ export class User {
     amountPerHour: number;
   }[];
 
+  /** Live outstanding balance (reviews − payments). Updated on review/transaction changes. */
+  @Prop({ type: Number, default: 0, min: 0 })
+  pendingAmount: number;
+
   @Prop({ type: String, select: false, required: false })
   @Exclude()
   refreshToken?: string;
@@ -64,3 +68,4 @@ export class User {
 
 export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index({ subscriberId: 1, email: 1 });
+UserSchema.index({ type: 1, status: 1, email: 1 });

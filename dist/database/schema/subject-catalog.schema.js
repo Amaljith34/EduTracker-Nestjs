@@ -11,16 +11,19 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubjectCatalogSchema = exports.SubjectCatalog = exports.SubjectStatus = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
+const mongoose_2 = require("mongoose");
 var SubjectStatus;
 (function (SubjectStatus) {
     SubjectStatus["ACTIVE"] = "active";
+    SubjectStatus["HOLD"] = "hold";
     SubjectStatus["INACTIVE"] = "inactive";
+    SubjectStatus["DELETED"] = "deleted";
 })(SubjectStatus || (exports.SubjectStatus = SubjectStatus = {}));
 let SubjectCatalog = class SubjectCatalog {
 };
 exports.SubjectCatalog = SubjectCatalog;
 __decorate([
-    (0, mongoose_1.Prop)({ required: true, trim: true, unique: true, lowercase: true }),
+    (0, mongoose_1.Prop)({ required: true, trim: true, lowercase: true }),
     __metadata("design:type", String)
 ], SubjectCatalog.prototype, "subjectName", void 0);
 __decorate([
@@ -32,9 +35,20 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], SubjectCatalog.prototype, "status", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: 'User', required: false, index: true }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], SubjectCatalog.prototype, "createdBy", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String, required: false }),
+    __metadata("design:type", String)
+], SubjectCatalog.prototype, "createdByName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String, required: false }),
+    __metadata("design:type", String)
+], SubjectCatalog.prototype, "createdByType", void 0);
 exports.SubjectCatalog = SubjectCatalog = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true, collection: 'subjects' })
 ], SubjectCatalog);
 exports.SubjectCatalogSchema = mongoose_1.SchemaFactory.createForClass(SubjectCatalog);
-exports.SubjectCatalogSchema.index({ subjectName: 1 }, { unique: true, collation: { locale: 'en', strength: 2 } });
 //# sourceMappingURL=subject-catalog.schema.js.map

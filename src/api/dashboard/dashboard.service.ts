@@ -6,6 +6,7 @@ import { TransactionRepository } from 'src/database/repositories/transaction.rep
 import { AuthUserPayload, UserType } from '../auth/auth.type';
 import { DashboardFilterDto } from './dto/dashboard-filter.dto';
 import { dateRangeMatch, resolveDateRange } from 'src/helpers/date-filter.helper';
+import { RecordStatus } from 'src/database/types';
 
 @Injectable()
 export class DashboardService {
@@ -20,13 +21,16 @@ export class DashboardService {
     const scope = this.buildScope(authUser, query.userId);
     const dateFilter = dateRangeMatch('date', fromDate, toDate);
     const paymentDateFilter = dateRangeMatch('paymentDate', fromDate, toDate);
+    const notDeleted = { status: { $ne: RecordStatus.DELETED } };
 
-    const reviewFilter = { ...scope, ...dateFilter };
-    const txnFilter = { ...scope, ...paymentDateFilter };
+    const reviewFilter = { ...scope, ...notDeleted, ...dateFilter };
+    const txnFilter = { ...scope, ...notDeleted, ...paymentDateFilter };
 
     const now = new Date();
     const weekStart = new Date(now);
-    weekStart.setDate(now.getDate() - now.getDay());
+    const day = weekStart.getDay();
+    const diffToMonday = day === 0 ? 6 : day - 1;
+    weekStart.setDate(weekStart.getDate() - diffToMonday);
     weekStart.setHours(0, 0, 0, 0);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const yearStart = new Date(now.getFullYear(), 0, 1);
@@ -59,17 +63,20 @@ export class DashboardService {
       this.transactionRepository.aggregateSum(txnFilter),
       this.reviewRepository.aggregateSum({
         ...scope,
+        ...notDeleted,
         date: { $gte: weekStart, $lte: now },
       }),
       this.reviewRepository.aggregateSum({
         ...scope,
+        ...notDeleted,
         date: { $gte: monthStart, $lte: now },
       }),
       this.reviewRepository.aggregateSum({
         ...scope,
+        ...notDeleted,
         date: { $gte: yearStart, $lte: now },
       }),
-      this.reviewRepository.aggregateByMonth(scope),
+      this.reviewRepository.aggregateByMonth({ ...scope, ...notDeleted }),
       this.reviewRepository.aggregateByMonth(reviewFilter),
       this.transactionRepository.aggregateByMonth(txnFilter),
     ]);

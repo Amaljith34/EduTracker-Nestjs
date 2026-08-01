@@ -1,4 +1,5 @@
 import {
+  ConflictException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -8,11 +9,12 @@ import { InjectModel } from '@nestjs/mongoose';
 import { ReviewRepository } from 'src/database/repositories/review.repository';
 import { TransactionRepository } from 'src/database/repositories/transaction.repository';
 import { HelperFunctionUtils } from 'src/helpers/helperFunction.utils';
+import { assertEmailPhoneAvailable } from 'src/helpers/user-uniqueness.helper';
 import { AuthUserPayload, UserType } from '../auth/auth.type';
 import { CreateUserDto } from './dto/user.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { FilterUserDto } from './dto/filterUser.dto';
-import { DBStatus } from 'src/database/types';
+import { DBStatus, RecordStatus } from 'src/database/types';
 import { User, UserDocument } from 'src/database/schema/user.schema';
 import { paginated } from 'src/helpers/pagination.helper';
 
@@ -36,21 +38,61 @@ export class UserService {
       throw new ForbiddenException('Only subscribers or admins can create users');
     }
 
-    const hashedPassword = await HelperFunctionUtils.hashPassword(dto.password);
-    const user = await this.userModel.create({
-      fullName: dto.fullName,
+    const { softDeletedMatch } = await assertEmailPhoneAvailable(this.userModel, {
       email: dto.email,
       phone: dto.phone,
-      password: hashedPassword,
-      type: UserType.USER,
-      subscriberId: new Types.ObjectId(subscriberId),
-      subscriberIds: [new Types.ObjectId(subscriberId)],
-      subjects: dto.subjects ?? [],
-      status: DBStatus.ACTIVE,
-      createdBy: new Types.ObjectId(authUser.userId),
+      allowSubscriberId: subscriberId,
+      creatingType: UserType.USER,
     });
 
-    return this.sanitize(user);
+    const hashedPassword = await HelperFunctionUtils.hashPassword(dto.password);
+
+    // Restore soft-deleted end-user with same email if present
+    if (
+      softDeletedMatch &&
+      softDeletedMatch.type === UserType.USER &&
+      softDeletedMatch.email === dto.email.trim().toLowerCase()
+    ) {
+      const restored = await this.userModel.findByIdAndUpdate(
+        softDeletedMatch._id,
+        {
+          fullName: dto.fullName,
+          phone: dto.phone,
+          password: hashedPassword,
+          type: UserType.USER,
+          subscriberId: new Types.ObjectId(subscriberId),
+          subscriberIds: [new Types.ObjectId(subscriberId)],
+          subjects: dto.subjects ?? [],
+          status: DBStatus.ACTIVE,
+          pendingAmount: 0,
+          createdBy: new Types.ObjectId(authUser.userId),
+        },
+        { new: true },
+      );
+      return this.sanitize(restored!);
+    }
+
+    try {
+      const user = await this.userModel.create({
+        fullName: dto.fullName,
+        email: dto.email,
+        phone: dto.phone,
+        password: hashedPassword,
+        type: UserType.USER,
+        subscriberId: new Types.ObjectId(subscriberId),
+        subscriberIds: [new Types.ObjectId(subscriberId)],
+        subjects: dto.subjects ?? [],
+        status: DBStatus.ACTIVE,
+        pendingAmount: 0,
+        createdBy: new Types.ObjectId(authUser.userId),
+      });
+      return this.sanitize(user);
+    } catch (err: unknown) {
+      if ((err as { code?: number })?.code === 11000) {
+        throw new ConflictException('Email or phone already exists');
+      }
+      throw err;
+    }
   }
 
   async findAll(authUser: AuthUserPayload, query: FilterUserDto) {
@@ -58,6 +100,10 @@ export class UserService {
       type: UserType.USER,
       status: { $ne: DBStatus.DELETED },
     };
+
+    if (query.status) {
+      filter.status = query.status;
+    }
 
     if (authUser.type === UserType.SUBSCRIBER) {
       filter.subscriberId = new Types.ObjectId(authUser.userId);
@@ -97,7 +143,10 @@ export class UserService {
     }
     this.assertAccess(authUser, user.subscriberId?.toString(), user._id.toString());
 
-    const userFilter = { userId: new Types.ObjectId(id) };
+    const userFilter = {
+      userId: new Types.ObjectId(id),
+      status: { $ne: RecordStatus.DELETED },
+    };
     const [reviewSum, txnSum, reviews, transactions] = await Promise.all([
       this.reviewRepository.aggregateSum(userFilter),
       this.transactionRepository.aggregateSum(userFilter),
@@ -107,6 +156,15 @@ export class UserService {
 
     const totalReviewAmount = reviewSum[0]?.total ?? 0;
     const totalPaid = txnSum[0]?.total ?? 0;
+    const remainingBalance = Number((totalReviewAmount - totalPaid).toFixed(2));
+
+    // Keep pendingAmount in sync with live calculation
+    if (user.pendingAmount !== remainingBalance) {
+      await this.userModel.findByIdAndUpdate(id, {
+        pendingAmount: Math.max(0, remainingBalance),
+      });
+      user.pendingAmount = Math.max(0, remainingBalance);
+    }
 
     return {
       user: this.sanitize(user),
@@ -115,7 +173,8 @@ export class UserService {
       summary: {
         totalReviewAmount,
         totalPaid,
-        remainingBalance: Number((totalReviewAmount - totalPaid).toFixed(2)),
+        remainingBalance,
+        pendingAmount: Math.max(0, remainingBalance),
       },
     };
   }
@@ -126,6 +185,16 @@ export class UserService {
       throw new NotFoundException('User not found');
     }
     this.assertAccess(authUser, user.subscriberId?.toString(), user._id.toString());
+
+    if (dto.email || dto.phone) {
+      await assertEmailPhoneAvailable(this.userModel, {
+        email: dto.email ?? user.email,
+        phone: dto.phone ?? user.phone,
+        allowSubscriberId: user.subscriberId?.toString(),
+        excludeId: id,
+        creatingType: UserType.USER,
+      });
+    }
 
     const update: Record<string, unknown> = { ...dto };
     if (dto.password) {
@@ -144,6 +213,27 @@ export class UserService {
     this.assertAccess(authUser, user.subscriberId?.toString(), user._id.toString());
     await this.userModel.findByIdAndUpdate(id, { status: DBStatus.DELETED });
     return { message: 'User deleted' };
+  }
+
+  /** Recalculate and persist pendingAmount for a user under optional subscriber scope */
+  async syncPendingAmount(userId: string) {
+    const filter = {
+      userId: new Types.ObjectId(userId),
+      status: { $ne: RecordStatus.DELETED },
+    };
+    const [reviewSum, txnSum] = await Promise.all([
+      this.reviewRepository.aggregateSum(filter),
+      this.transactionRepository.aggregateSum(filter),
+    ]);
+    const totalReviewAmount = reviewSum[0]?.total ?? 0;
+    const totalPaid = txnSum[0]?.total ?? 0;
+    const pendingAmount = Math.max(0, Number((totalReviewAmount - totalPaid).toFixed(2)));
+    await this.userModel.findByIdAndUpdate(userId, { pendingAmount });
+    return {
+      totalReviewAmount,
+      totalPaid,
+      pendingAmount,
+    };
   }
 
   private assertAccess(

@@ -17,6 +17,7 @@ const review_repository_1 = require("../../database/repositories/review.reposito
 const transaction_repository_1 = require("../../database/repositories/transaction.repository");
 const auth_type_1 = require("../auth/auth.type");
 const date_filter_helper_1 = require("../../helpers/date-filter.helper");
+const types_1 = require("../../database/types");
 let DashboardService = class DashboardService {
     constructor(userRepository, reviewRepository, transactionRepository) {
         this.userRepository = userRepository;
@@ -28,11 +29,14 @@ let DashboardService = class DashboardService {
         const scope = this.buildScope(authUser, query.userId);
         const dateFilter = (0, date_filter_helper_1.dateRangeMatch)('date', fromDate, toDate);
         const paymentDateFilter = (0, date_filter_helper_1.dateRangeMatch)('paymentDate', fromDate, toDate);
-        const reviewFilter = { ...scope, ...dateFilter };
-        const txnFilter = { ...scope, ...paymentDateFilter };
+        const notDeleted = { status: { $ne: types_1.RecordStatus.DELETED } };
+        const reviewFilter = { ...scope, ...notDeleted, ...dateFilter };
+        const txnFilter = { ...scope, ...notDeleted, ...paymentDateFilter };
         const now = new Date();
         const weekStart = new Date(now);
-        weekStart.setDate(now.getDate() - now.getDay());
+        const day = weekStart.getDay();
+        const diffToMonday = day === 0 ? 6 : day - 1;
+        weekStart.setDate(weekStart.getDate() - diffToMonday);
         weekStart.setHours(0, 0, 0, 0);
         const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const yearStart = new Date(now.getFullYear(), 0, 1);
@@ -51,17 +55,20 @@ let DashboardService = class DashboardService {
             this.transactionRepository.aggregateSum(txnFilter),
             this.reviewRepository.aggregateSum({
                 ...scope,
+                ...notDeleted,
                 date: { $gte: weekStart, $lte: now },
             }),
             this.reviewRepository.aggregateSum({
                 ...scope,
+                ...notDeleted,
                 date: { $gte: monthStart, $lte: now },
             }),
             this.reviewRepository.aggregateSum({
                 ...scope,
+                ...notDeleted,
                 date: { $gte: yearStart, $lte: now },
             }),
-            this.reviewRepository.aggregateByMonth(scope),
+            this.reviewRepository.aggregateByMonth({ ...scope, ...notDeleted }),
             this.reviewRepository.aggregateByMonth(reviewFilter),
             this.transactionRepository.aggregateByMonth(txnFilter),
         ]);

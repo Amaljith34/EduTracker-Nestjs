@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { IsDateString, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
+import { RecordStatus } from 'src/database/types';
 
 export class UpdateTransactionDto {
   @ApiPropertyOptional()
@@ -17,4 +18,9 @@ export class UpdateTransactionDto {
   @IsOptional()
   @IsString()
   notes?: string;
+
+  @ApiPropertyOptional({ enum: RecordStatus })
+  @IsOptional()
+  @IsEnum(RecordStatus)
+  status?: RecordStatus;
 }

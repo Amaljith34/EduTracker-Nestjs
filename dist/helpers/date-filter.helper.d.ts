@@ -3,6 +3,7 @@ export type DateFilterQuery = {
     toDate?: string;
     period?: 'week' | 'month' | 'year';
 };
+export declare const parseLocalDate: (value: string, endOfDay?: boolean) => Date;
 export declare const resolveDateRange: (query: DateFilterQuery) => {
     fromDate: Date;
     toDate: Date;

@@ -1,38 +1,52 @@
+import { SubjectStatus } from 'src/database/schema/subject-catalog.schema';
 import { SubjectCatalogRepository } from 'src/database/repositories/subject-catalog.repository';
 import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
+import { AuthUserPayload } from '../auth/auth.type';
 export declare class SubjectsService {
     private readonly subjectRepository;
     constructor(subjectRepository: SubjectCatalogRepository);
-    create(dto: CreateSubjectDto): Promise<{
+    create(authUser: AuthUserPayload, dto: CreateSubjectDto): Promise<{
         subjectId: string;
         subjectName: string;
-        status: import("src/database/schema/subject-catalog.schema").SubjectStatus;
+        status: SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    findAll(status?: string): Promise<{
+    findAll(authUser: AuthUserPayload, status?: string): Promise<{
         subjectId: string;
         subjectName: string;
-        status: import("src/database/schema/subject-catalog.schema").SubjectStatus;
+        status: SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }[]>;
-    findOne(id: string): Promise<{
+    findOne(authUser: AuthUserPayload, id: string): Promise<{
         subjectId: string;
         subjectName: string;
-        status: import("src/database/schema/subject-catalog.schema").SubjectStatus;
+        status: SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    update(id: string, dto: UpdateSubjectDto): Promise<{
+    update(authUser: AuthUserPayload, id: string, dto: UpdateSubjectDto): Promise<{
         subjectId: string;
         subjectName: string;
-        status: import("src/database/schema/subject-catalog.schema").SubjectStatus;
+        status: SubjectStatus;
+        createdBy: string;
+        createdByName: string;
+        createdByType: string;
         createdAt: Date;
         updatedAt: Date;
     }>;
-    remove(id: string): Promise<{
+    remove(authUser: AuthUserPayload, id: string): Promise<{
         message: string;
     }>;
     private toResponse;

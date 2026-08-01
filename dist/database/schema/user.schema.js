@@ -22,9 +22,9 @@ __decorate([
     (0, mongoose_1.Prop)({
         required: true,
         type: String,
-        unique: true,
         lowercase: true,
         trim: true,
+        index: true,
     }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
@@ -33,7 +33,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "fullName", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, trim: true, required: false }),
+    (0, mongoose_1.Prop)({ type: String, trim: true, required: false, index: true }),
     __metadata("design:type", String)
 ], User.prototype, "phone", void 0);
 __decorate([
@@ -71,6 +71,10 @@ __decorate([
     __metadata("design:type", Array)
 ], User.prototype, "subjects", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: 0, min: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "pendingAmount", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: String, select: false, required: false }),
     (0, class_transformer_1.Exclude)(),
     __metadata("design:type", String)
@@ -84,4 +88,5 @@ exports.User = User = __decorate([
 ], User);
 exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
 exports.UserSchema.index({ subscriberId: 1, email: 1 });
+exports.UserSchema.index({ type: 1, status: 1, email: 1 });
 //# sourceMappingURL=user.schema.js.map
