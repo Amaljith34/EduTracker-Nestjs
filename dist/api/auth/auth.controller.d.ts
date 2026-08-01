@@ -17,7 +17,10 @@ export declare class AuthController {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: import("../../database/types").DBStatus;
         };
         subscribers: {
@@ -38,7 +41,10 @@ export declare class AuthController {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: import("../../database/types").DBStatus;
         };
         subscribers: {
@@ -59,7 +65,10 @@ export declare class AuthController {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: import("../../database/types").DBStatus;
         };
         subscribers: {
@@ -82,7 +91,10 @@ export declare class AuthController {
         phone: string;
         subscriberId: string;
         subscriberIds: string[];
-        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        subjects: {
+            subjectName: string;
+            amountPerHour: number;
+        }[];
         status: import("../../database/types").DBStatus;
     }>;
     updateProfile(authUser: AuthUserPayload, dto: UpdateProfileDto): Promise<{
@@ -93,7 +105,10 @@ export declare class AuthController {
         phone: string;
         subscriberId: string;
         subscriberIds: string[];
-        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        subjects: {
+            subjectName: string;
+            amountPerHour: number;
+        }[];
         status: import("../../database/types").DBStatus;
     }>;
     selectSubscriber(authUser: AuthUserPayload, dto: SelectSubscriberDto): Promise<{
@@ -106,7 +121,10 @@ export declare class AuthController {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: import("../../database/types").DBStatus;
         };
         subscribers: {

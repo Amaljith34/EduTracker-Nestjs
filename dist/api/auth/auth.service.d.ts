@@ -20,7 +20,10 @@ export declare class AuthService {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: DBStatus;
         };
         subscribers: {
@@ -41,7 +44,10 @@ export declare class AuthService {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: DBStatus;
         };
         subscribers: {
@@ -63,7 +69,10 @@ export declare class AuthService {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: DBStatus;
         };
         subscribers: {
@@ -83,7 +92,10 @@ export declare class AuthService {
             phone: string;
             subscriberId: string;
             subscriberIds: string[];
-            subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+            subjects: {
+                subjectName: string;
+                amountPerHour: number;
+            }[];
             status: DBStatus;
         };
         subscribers: {
@@ -106,7 +118,10 @@ export declare class AuthService {
         phone: string;
         subscriberId: string;
         subscriberIds: string[];
-        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        subjects: {
+            subjectName: string;
+            amountPerHour: number;
+        }[];
         status: DBStatus;
     }>;
     updateProfile: (userId: string, dto: UpdateProfileDto) => Promise<{
@@ -117,7 +132,10 @@ export declare class AuthService {
         phone: string;
         subscriberId: string;
         subscriberIds: string[];
-        subjects: import("../../database/schema/user-subject.schema").UserSubject[];
+        subjects: {
+            subjectName: string;
+            amountPerHour: number;
+        }[];
         status: DBStatus;
     }>;
     private toPublicUser;

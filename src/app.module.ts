@@ -7,7 +7,7 @@ import { MongooseConfig } from './configs/mongoose.config';
 import { AuthModule } from './api/auth/auth.module';
 import { ReviewsModule } from './api/reviews/reviews.module';
 import { AnalyticsModule } from './api/analytics/analytics.module';
-import { UsersModule } from './api/users/users.module';
+import { UserModule } from './api/user/user.module';
 import { SubscribersModule } from './api/subscribers/subscribers.module';
 import { TransactionsModule } from './api/transactions/transactions.module';
 import { DashboardModule } from './api/dashboard/dashboard.module';
@@ -43,7 +43,7 @@ import { SubjectsModule } from './api/subjects/subjects.module';
       useClass: MongooseConfig,
     }),
     AuthModule,
-    UsersModule,
+    UserModule,
     SubscribersModule,
     ReviewsModule,
     TransactionsModule,

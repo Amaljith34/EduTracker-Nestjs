@@ -22,7 +22,7 @@ const auth_type_1 = require("../auth/auth.type");
 const subscribers_service_1 = require("./subscribers.service");
 const create_subscriber_dto_1 = require("./dto/create-subscriber.dto");
 const update_subscriber_dto_1 = require("./dto/update-subscriber.dto");
-const filter_user_dto_1 = require("../users/dto/filter-user.dto");
+const filterUser_dto_1 = require("../user/dto/filterUser.dto");
 let SubscribersController = class SubscribersController {
     constructor(subscribersService) {
         this.subscribersService = subscribersService;
@@ -59,7 +59,7 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [filter_user_dto_1.FilterUserDto]),
+    __metadata("design:paramtypes", [filterUser_dto_1.FilterUserDto]),
     __metadata("design:returntype", void 0)
 ], SubscribersController.prototype, "findAll", null);
 __decorate([

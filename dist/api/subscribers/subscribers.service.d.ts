@@ -4,7 +4,7 @@ import { ReviewRepository } from 'src/database/repositories/review.repository';
 import { TransactionRepository } from 'src/database/repositories/transaction.repository';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
-import { FilterUserDto } from '../users/dto/filter-user.dto';
+import { FilterUserDto } from '../user/dto/filterUser.dto';
 import { AuthUserPayload } from '../auth/auth.type';
 export declare class SubscribersService {
     private readonly userRepository;

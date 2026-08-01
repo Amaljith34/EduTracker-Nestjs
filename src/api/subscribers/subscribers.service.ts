@@ -7,7 +7,7 @@ import { HelperFunctionUtils } from 'src/helpers/helperFunction.utils';
 import { UserType } from '../auth/auth.type';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
-import { FilterUserDto } from '../users/dto/filter-user.dto';
+import { FilterUserDto } from '../user/dto/filterUser.dto';
 import { DBStatus } from 'src/database/types';
 import { paginated } from 'src/helpers/pagination.helper';
 import { AuthUserPayload } from '../auth/auth.type';

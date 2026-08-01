@@ -16,7 +16,7 @@ const mongoose_config_1 = require("./configs/mongoose.config");
 const auth_module_1 = require("./api/auth/auth.module");
 const reviews_module_1 = require("./api/reviews/reviews.module");
 const analytics_module_1 = require("./api/analytics/analytics.module");
-const users_module_1 = require("./api/users/users.module");
+const user_module_1 = require("./api/user/user.module");
 const subscribers_module_1 = require("./api/subscribers/subscribers.module");
 const transactions_module_1 = require("./api/transactions/transactions.module");
 const dashboard_module_1 = require("./api/dashboard/dashboard.module");
@@ -55,7 +55,7 @@ exports.AppModule = AppModule = __decorate([
                 useClass: mongoose_config_1.MongooseConfig,
             }),
             auth_module_1.AuthModule,
-            users_module_1.UsersModule,
+            user_module_1.UserModule,
             subscribers_module_1.SubscribersModule,
             reviews_module_1.ReviewsModule,
             transactions_module_1.TransactionsModule,

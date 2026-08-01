@@ -1,7 +1,6 @@
 import { Document, Types } from 'mongoose';
 import { UserType } from 'src/api/auth/auth.type';
 import { DBStatus } from '../types';
-import { UserSubject } from './user-subject.schema';
 export type UserDocument = User & Document;
 export declare class User {
     email: string;
@@ -12,7 +11,10 @@ export declare class User {
     status: DBStatus;
     subscriberId?: Types.ObjectId;
     subscriberIds?: Types.ObjectId[];
-    subjects: UserSubject[];
+    subjects: {
+        subjectName: string;
+        amountPerHour: number;
+    }[];
     refreshToken?: string;
     createdBy?: Types.ObjectId;
 }

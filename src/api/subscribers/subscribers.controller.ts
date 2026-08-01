@@ -17,7 +17,7 @@ import { AuthUserPayload, UserType } from '../auth/auth.type';
 import { SubscribersService } from './subscribers.service';
 import { CreateSubscriberDto } from './dto/create-subscriber.dto';
 import { UpdateSubscriberDto } from './dto/update-subscriber.dto';
-import { FilterUserDto } from '../users/dto/filter-user.dto';
+import { FilterUserDto } from '../user/dto/filterUser.dto';
 
 @Controller('subscribers')
 @ApiTags('Subscribers')

@@ -11,16 +11,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserSchema = exports.User = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
-const mongoose_2 = require("mongoose");
 const class_transformer_1 = require("class-transformer");
+const mongoose_2 = require("mongoose");
 const auth_type_1 = require("../../api/auth/auth.type");
 const types_1 = require("../types");
-const user_subject_schema_1 = require("./user-subject.schema");
 let User = class User {
 };
 exports.User = User;
 __decorate([
-    (0, mongoose_1.Prop)({ required: true, type: String, unique: true, lowercase: true, trim: true }),
+    (0, mongoose_1.Prop)({
+        required: true,
+        type: String,
+        unique: true,
+        lowercase: true,
+        trim: true,
+    }),
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
 __decorate([
@@ -28,7 +33,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "fullName", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: String, trim: true }),
+    (0, mongoose_1.Prop)({ type: String, trim: true, required: false }),
     __metadata("design:type", String)
 ], User.prototype, "phone", void 0);
 __decorate([
@@ -45,7 +50,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "status", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: 'User', index: true }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: 'User', index: true, required: false }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], User.prototype, "subscriberId", void 0);
 __decorate([
@@ -53,20 +58,29 @@ __decorate([
     __metadata("design:type", Array)
 ], User.prototype, "subscriberIds", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: [user_subject_schema_1.UserSubjectSchema], default: [] }),
+    (0, mongoose_1.Prop)({
+        type: [
+            {
+                subjectName: { type: String, required: true, trim: true },
+                amountPerHour: { type: Number, required: true, min: 0 },
+            },
+        ],
+        required: false,
+        default: [],
+    }),
     __metadata("design:type", Array)
 ], User.prototype, "subjects", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ select: false }),
+    (0, mongoose_1.Prop)({ type: String, select: false, required: false }),
     (0, class_transformer_1.Exclude)(),
     __metadata("design:type", String)
 ], User.prototype, "refreshToken", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: 'User' }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: 'User', required: false }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], User.prototype, "createdBy", void 0);
 exports.User = User = __decorate([
-    (0, mongoose_1.Schema)({ timestamps: true, collection: 'users' })
+    (0, mongoose_1.Schema)({ timestamps: true })
 ], User);
 exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
 exports.UserSchema.index({ subscriberId: 1, email: 1 });

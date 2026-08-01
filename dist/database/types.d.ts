@@ -1,7 +1,7 @@
 export declare enum DBStatus {
-    ACTIVE = "Active",
-    HOLD = "Hold",
-    DELETED = "Deleted"
+    ACTIVE = "ACTIVE",
+    HOLD = "HOLD",
+    DELETED = "DELETED"
 }
 export interface IPagination {
     limit?: number;
