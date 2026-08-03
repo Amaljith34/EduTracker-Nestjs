@@ -18,8 +18,8 @@ export class DashboardFilterDto implements DateFilterQuery {
   @IsString()
   toDate?: string;
 
-  @ApiPropertyOptional({ enum: ['week', 'month', 'year'] })
+  @ApiPropertyOptional({ enum: ['all', 'lastMonth', 'month', 'year'] })
   @IsOptional()
   @IsString()
-  period?: 'week' | 'month' | 'year';
+  period?: 'all' | 'lastMonth' | 'month' | 'year';
 }

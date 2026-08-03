@@ -6,12 +6,14 @@ import { DbHelpers } from 'src/utils/helper/database/db.helpers';
 import { getPagination, PaginationQuery } from 'src/helpers/pagination.helper';
 import { dateRangeMatch, resolveDateRange, DateFilterQuery } from 'src/helpers/date-filter.helper';
 import { RecordStatus } from '../types';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class ReviewRepository {
   constructor(
     @InjectModel(Review.name)
     private readonly reviewModel: Model<ReviewDocument>,
+    private readonly userRepository: UserRepository,
   ) {}
 
   create(data: Partial<Review>) {
@@ -33,7 +35,7 @@ export class ReviewRepository {
 
   async findPaginated(
     filter: FilterQuery<ReviewDocument>,
-    query: PaginationQuery & DateFilterQuery,
+    query: PaginationQuery & DateFilterQuery & { search?: string },
   ) {
     const { page, limit, skip, sort } = getPagination(query);
     const { fromDate, toDate } = resolveDateRange(query);
@@ -58,6 +60,28 @@ export class ReviewRepository {
       mongoFilter.subscriberId = new Types.ObjectId(
         (query as { subscriberId: string }).subscriberId,
       );
+    }
+
+    if (query.search) {
+      const searchNumber = Number(query.search);
+      const orConditions: any[] = [];
+      
+      const userIds = await this.userRepository.findIdsByName(query.search);
+      if (userIds.length > 0) {
+        orConditions.push({ userId: { $in: userIds } });
+      }
+      
+      if (!isNaN(searchNumber)) {
+        orConditions.push({ calculatedAmount: searchNumber });
+        orConditions.push({ finalAmount: searchNumber });
+      }
+
+      if (orConditions.length > 0) {
+        mongoFilter.$or = orConditions;
+      } else {
+        // Force no results if search text doesn't match a user or number
+        mongoFilter._id = new Types.ObjectId();
+      }
     }
 
     const [data, total] = await Promise.all([

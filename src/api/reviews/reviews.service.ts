@@ -83,7 +83,21 @@ export class ReviewsService {
   async findAll(authUser: AuthUserPayload, query: FilterReviewDto) {
     const filter = this.buildScopeFilter(authUser);
     const result = await this.reviewRepository.findPaginated(filter, query);
-    return paginated(result.data, result.total, result.page, result.limit);
+    
+    // Calculate thisMonthCount
+    const now = new Date();
+    const thisMonthStart = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const thisMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    
+    // Use the same base query but override the date range to "this month"
+    // We ignore the pagination and just count.
+    const countResult = await this.reviewRepository.findPaginated(
+      filter, 
+      { ...query, page: 1, limit: 1, fromDate: thisMonthStart.toISOString(), toDate: thisMonthEnd.toISOString(), period: undefined }
+    );
+
+    const response = paginated(result.data, result.total, result.page, result.limit);
+    return { ...response, thisMonthCount: countResult.total };
   }
 
   async update(authUser: AuthUserPayload, id: string, dto: UpdateReviewDto) {

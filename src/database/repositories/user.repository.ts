@@ -39,6 +39,17 @@ export class UserRepository {
     return this.userModel.findById(id).select('+refreshToken');
   }
 
+  async findIdsByName(name: string): Promise<Types.ObjectId[]> {
+    const users = await this.userModel
+      .find({
+        fullName: { $regex: new RegExp(name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i') },
+        status: { $ne: DBStatus.DELETED },
+      })
+      .select('_id')
+      .lean();
+    return users.map((u) => u._id as Types.ObjectId);
+  }
+
   create(data: Partial<User>) {
     return this.userModel.create(data);
   }

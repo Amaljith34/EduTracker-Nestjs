@@ -1,7 +1,7 @@
 export type DateFilterQuery = {
   fromDate?: string;
   toDate?: string;
-  period?: 'week' | 'month' | 'year';
+  period?: 'all' | 'lastMonth' | 'month' | 'year';
 };
 
 /** Parse YYYY-MM-DD (or ISO) as local calendar date to avoid UTC day-shift bugs */
@@ -24,7 +24,6 @@ export const parseLocalDate = (value: string, endOfDay = false): Date => {
 /**
  * Resolve from/to range.
  * Custom fromDate/toDate take precedence over period when both are provided.
- * "week" = Monday 00:00 → end of today (local).
  */
 export const resolveDateRange = (query: DateFilterQuery) => {
   const now = new Date();
@@ -33,16 +32,11 @@ export const resolveDateRange = (query: DateFilterQuery) => {
 
   const hasCustomRange = Boolean(query.fromDate || query.toDate);
 
-  if (!hasCustomRange && query.period === 'week') {
-    const start = new Date(now);
-    // Monday-based week (ISO): getDay() Sun=0 … Sat=6 → days since Monday
-    const day = start.getDay();
-    const diffToMonday = day === 0 ? 6 : day - 1;
-    start.setDate(start.getDate() - diffToMonday);
-    start.setHours(0, 0, 0, 0);
-    fromDate = start;
-    toDate = new Date(now);
-    toDate.setHours(23, 59, 59, 999);
+  if (!hasCustomRange && query.period === 'lastMonth') {
+    const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+    fromDate = lastMonthStart;
+    toDate = lastMonthEnd;
   } else if (!hasCustomRange && query.period === 'month') {
     fromDate = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
     toDate = new Date(now);
